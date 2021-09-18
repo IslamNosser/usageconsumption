@@ -1,10 +1,10 @@
-package com.orange.usageconsumption.objects;
+package com.orange.usageconsumption.objects.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CustomerDetailedInquiry {
+public class CustomerDetailedInquiryRequest {
 	String dial;
 	String fromdate;
 	String todate;
