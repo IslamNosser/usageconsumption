@@ -14,6 +14,8 @@ public class Day {
 	Voice voice;
 	@JsonProperty("Internet")
 	Internet internet;
+	@JsonProperty("SMS")
+	SMS sms;
 
 	public String getDate() {
 		return date;
@@ -45,5 +47,13 @@ public class Day {
 
 	public void setInternet(Internet internet) {
 		this.internet = internet;
+	}
+
+	public SMS getSms() {
+		return sms;
+	}
+
+	public void setSms(SMS sms) {
+		this.sms = sms;
 	}
 }
