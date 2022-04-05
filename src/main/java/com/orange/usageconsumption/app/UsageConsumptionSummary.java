@@ -1,5 +1,7 @@
 package com.orange.usageconsumption.app;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,9 +24,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.orange.usageconsumption.objects.request.CustomerDetailedInquiryRequest;
 import com.orange.usageconsumption.objects.response.CustomerSummaryInquiry;
-import com.orange.usageconsumption.objects.response.Day;
 import com.orange.usageconsumption.objects.response.Summary;
 import com.orange.usageconsumption.utils.UsageUtils;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -32,16 +35,17 @@ public class UsageConsumptionSummary {
 	@PersistenceContext
 	private EntityManager entityManager;
 	XmlMapper xmlMapper = new XmlMapper();
+	private Logger logger = LogManager.getLogger(UsageConsumptionSummary.class);
 
 	@RequestMapping(value = "/services/consumption_summary", consumes = { "application/xml" }, produces = {
 			"application/xml" }, method = RequestMethod.POST)
 	@ResponseBody
 	public CustomerSummaryInquiry getSummary(@RequestBody String request)
 			throws JsonMappingException, JsonProcessingException {
+		long start = System.currentTimeMillis();
 		CustomerSummaryInquiry summary = new CustomerSummaryInquiry();
+		CustomerDetailedInquiryRequest request_obj = xmlMapper.readValue(request, CustomerDetailedInquiryRequest.class);
 		try {
-			CustomerDetailedInquiryRequest request_obj = xmlMapper.readValue(request,
-					CustomerDetailedInquiryRequest.class);
 			StoredProcedureQuery query = entityManager.createStoredProcedureQuery("USAGE_SUMMARY_T");
 			query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
 			query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
@@ -74,6 +78,19 @@ public class UsageConsumptionSummary {
 				return o1.getDate().compareTo(o2.getDate());
 			}
 		});
+		long end = System.currentTimeMillis();
+		logger.info(request_obj.getTransactionID() + " | " 
+				+ xmlMapper.writeValueAsString(request_obj) + " | " 
+				+ xmlMapper.writeValueAsString(summary)
+				+ summary.getErrCode() + " | "
+				+ (end-start) + " | "
+				+ "-" + " | "
+				+ request_obj.getDial() + " | "
+				+ request_obj.getCallername() + " | "
+				+ "SummaryAPI" + " | "
+				+ UsageUtils.getHostname() + " | "
+				+ "8080"
+				);
 		return summary;
 	}
 }

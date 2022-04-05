@@ -1,5 +1,7 @@
 package com.orange.usageconsumption.utils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +17,20 @@ import com.orange.usageconsumption.objects.response.Summary;
 import com.orange.usageconsumption.objects.response.Voice;
 
 public class UsageUtils {
-	public static HashMap<String, ArrayList<Detailed>> formatDetailedUsg(ArrayList<Object> detailedUsgList) {
+	
+	private static String hostname = null;
+	
+	public static String getHostname() {
+		if(hostname == null) {
+			try {
+				hostname = InetAddress.getLocalHost().getHostName();
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
+		return hostname;
+	}
+ 	public static HashMap<String, ArrayList<Detailed>> formatDetailedUsg(ArrayList<Object> detailedUsgList) {
 		HashMap<String, ArrayList<Detailed>> formattedUsg = new HashMap<>();
 		for (Object single_usage_object : detailedUsgList) {
 			Detailed temp_detailed = new Detailed();

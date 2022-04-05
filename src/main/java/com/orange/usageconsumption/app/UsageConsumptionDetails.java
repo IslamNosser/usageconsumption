@@ -39,27 +39,26 @@ import com.orange.usageconsumption.objects.response.Day;
 import com.orange.usageconsumption.objects.response.Detailed;
 import com.orange.usageconsumption.utils.UsageUtils;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-public class UsageConsumptionDetails extends SpringBootServletInitializer {
+public class UsageConsumptionDetails {
 	@PersistenceContext
 	private EntityManager entityManager;
 	XmlMapper xmlMapper = new XmlMapper();
+	private Logger logger = LogManager.getLogger(UsageConsumptionDetails.class);
 
 	@RequestMapping(value = "/services/consumption_details", consumes = { "application/xml" }, produces = {
 			"application/xml" }, method = RequestMethod.POST)
 	@ResponseBody
 	public CustomerDetailedInquiry getUsage(@RequestBody String request)
 			throws JsonMappingException, JsonProcessingException {
+		long start = System.currentTimeMillis();
+		CustomerDetailedInquiryRequest request_obj = xmlMapper.readValue(request, CustomerDetailedInquiryRequest.class);
 		CustomerDetailedInquiry response = new CustomerDetailedInquiry();
 		try {
-			CustomerDetailedInquiryRequest request_obj = xmlMapper.readValue(request,
-					CustomerDetailedInquiryRequest.class);
-			System.out.println(request_obj.getDial() + "," + request_obj.getFromdate() + "," + request_obj.getTodate()
-					+ "," + request_obj.getLang() + "," + request_obj.getTransactionID() + ","
-					+ request_obj.getCallername());
-			;
-			System.out.println("Test");
 			StoredProcedureQuery query = entityManager.createStoredProcedureQuery("USAGE_DETAILS_T");
 
 			// Declare the parameters in the same order
@@ -95,6 +94,20 @@ public class UsageConsumptionDetails extends SpringBootServletInitializer {
 				return o1.getDate().compareTo(o2.getDate());
 			}
 		});
+		long end = System.currentTimeMillis();
+
+		logger.info(request_obj.getTransactionID() + " | " 
+				+ xmlMapper.writeValueAsString(request_obj) + " | " 
+				+ xmlMapper.writeValueAsString(response)
+				+ response.getErrcode() + " | "
+				+ (end-start) + " | "
+				+ "-" + " | "
+				+ request_obj.getDial() + " | "
+				+ request_obj.getCallername() + " | "
+				+ "DetailsAPI" + " | "
+				+ UsageUtils.getHostname() + " | "
+				+ "8080"
+				);
 		return response;
 	}
 }
